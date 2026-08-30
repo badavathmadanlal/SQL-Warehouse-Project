@@ -1,16 +1,19 @@
 /*
-============================================================================
-Bronze Layer - Table Setup
-============================================================================
+DDL Script: Create Bronze Tables
+
 Purpose:
-    Create the required tables for the Bronze layer of the data warehouse.
+    Creates the tables required for the Bronze layer.
 
-    The Bronze layer stores the source data in its original form.
-    Before creating each table, any existing version is removed so that
-    the table structure can be recreated cleanly when the script is run again.
+    The Bronze layer stores raw data loaded from the source CSV files.
+    Existing tables are dropped and recreated when this script is executed.
 
-    This script is mainly used to initialize or reset the Bronze layer tables.
-============================================================================
+Tables Created:
+    - bronze.crm_cust_info
+    - bronze.crm_prd_info
+    - bronze.crm_sales_details
+    - bronze.erp_cust_az12
+    - bronze.erp_loc_a101
+    - bronze.erp_px_cat_g1v2
 */
 
 CREATE OR ALTER PROCEDURE bronze.load_bronze AS 
