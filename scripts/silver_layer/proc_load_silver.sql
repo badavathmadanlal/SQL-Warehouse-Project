@@ -1,17 +1,39 @@
 /*
-Silver Layer - Data Loading
+
+======================================================================
+Stored Procedure: silver.load_silver
+======================================================================
 
 Purpose:
-    Clean, standardize and load data from the Bronze layer into
-    the Silver layer.
+    Cleans and transforms data from the Bronze layer and loads it
+    into the Silver layer.
 
-    The procedure handles customer, product, sales, ERP customer,
-    location and product category data.
+Process:
+    - Truncates existing Silver tables before loading.
+    - Removes duplicate customer records using ROW_NUMBER().
+    - Trims unwanted spaces from text fields.
+    - Standardizes marital status and gender values.
+    - Cleans and transforms product keys and category IDs.
+    - Handles missing product costs.
+    - Standardizes product line values.
+    - Derives product end dates using LEAD().
+    - Converts invalid sales dates to NULL.
+    - Validates and derives sales and price values.
+    - Cleans ERP customer IDs and invalid birth dates.
+    - Standardizes gender values.
+    - Cleans ERP location IDs and country names.
+    - Loads cleaned ERP product category data.
+    - Displays progress messages during execution.
 
-    Each Silver table is cleared before loading and the procedure
-    records individual load times, total batch duration and errors.
+Source:
+    Bronze layer tables
+
+Target:
+    Silver layer tables
+
+Usage:
+    EXEC silver.load_silver;
 */
-
 USE DataWarehouse;
 GO
 
