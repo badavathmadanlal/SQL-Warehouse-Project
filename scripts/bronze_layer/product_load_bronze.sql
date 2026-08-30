@@ -1,15 +1,21 @@
 /*
-Bronze Layer - Data Loading
+DDL Script: Create Bronze Tables
 
 Purpose:
-    Load the source CRM and ERP CSV files into the Bronze layer.
+    Creates the tables required for the Bronze layer.
 
-    Existing Bronze data is cleared before each load so that the
-    tables contain the latest source data.
+    The Bronze layer stores raw data loaded from the source CSV files.
+    Existing tables are dropped and recreated when this script is executed.
 
-    The procedure also records individual table load times,
-    total batch duration and errors that occur during loading.
+Tables Created:
+    - bronze.crm_cust_info
+    - bronze.crm_prd_info
+    - bronze.crm_sales_details
+    - bronze.erp_cust_az12
+    - bronze.erp_loc_a101
+    - bronze.erp_px_cat_g1v2
 */
+
 
 USE DataWarehouse;
 GO
