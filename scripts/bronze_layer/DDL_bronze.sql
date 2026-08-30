@@ -1,5 +1,7 @@
 /*
+---------------------------------------
 DDL Script: Create Bronze Tables
+----------------------------------------
 
 Purpose:
     Creates the tables required for the Bronze layer.
