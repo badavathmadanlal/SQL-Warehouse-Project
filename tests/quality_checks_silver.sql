@@ -82,7 +82,7 @@ WHERE prd_end_dt < prd_start_dt;
 
 -- Check silver.crm_sales_details
 
--- Check for invalid due dates in Bronze data
+-- Check for invalid dates
 -- Expectation: No invalid dates
 SELECT 
     NULLIF(sls_due_dt, 0) AS sls_due_dt 
