@@ -1,16 +1,22 @@
 /*
-Silver Layer - Table Setup
+---------------------------------------------------------------------------------------------
+DDL Script: Create Silver Tables
+---------------------------------------------------------------------------------------------
 
 Purpose:
-    Create the required tables for the Silver layer of the data warehouse.
+    Creates the tables required for the Silver layer.
 
-    The Silver layer stores cleaned and standardized data prepared
-    from the Bronze layer.
+    The Silver layer stores cleaned, standardized, and transformed
+    data from the Bronze layer.
 
-    Existing tables are removed before recreation so the Silver
-    layer structure can be reset when required.
+Tables Created:
+    - silver.crm_cust_info
+    - silver.crm_prd_info
+    - silver.crm_sales_details
+    - silver.erp_cust_az12
+    - silver.erp_loc_a101
+    - silver.erp_px_cat_g1v2
 */
-
 USE DataWarehouse;
 GO
 
