@@ -1,75 +1,91 @@
-# SQL Data Warehouse Project
+<div align="center">
 
-A SQL Server data warehouse project built using the Medallion Architecture with Bronze, Silver, and Gold layers.
+# 🗄️ SQL Server Data Warehouse
 
-The project loads raw CRM and ERP data, cleans and transforms the data, performs data quality checks, and creates business-ready views for analytics and reporting.
+*A complete SQL Server Data Warehouse built using a layered Medallion Architecture for data integration, transformation, data quality validation, and analytics.*
 
----
+<p>
+  <img src="https://img.shields.io/badge/SQL%20Server-CC2927?style=for-the-badge&logo=microsoftsqlserver&logoColor=white">
+  <img src="https://img.shields.io/badge/T--SQL-0078D4?style=for-the-badge&logo=microsoft&logoColor=white">
+  <img src="https://img.shields.io/badge/SSMS-0078D4?style=for-the-badge&logo=microsoft&logoColor=white">
+  <img src="https://img.shields.io/badge/Git-F05032?style=for-the-badge&logo=git&logoColor=white">
+  <img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white">
+</p>
 
-## Data Architecture
-
-The project follows a three-layer data warehouse architecture:
-
-Source Data → Bronze Layer → Silver Layer → Gold Layer
-
-### Bronze Layer
-
-The Bronze layer stores raw CRM and ERP source data in SQL Server.
-
-The data is loaded from CSV files with minimal transformation.
-
-### Silver Layer
-
-The Silver layer cleans, standardizes, validates, and transforms the Bronze data.
-
-This layer prepares the data for integration and analytical use.
-
-### Gold Layer
-
-The Gold layer contains the final business-ready views.
-
-The current Gold layer follows a Star Schema containing customer and product dimensions and a sales fact view.
+</div>
 
 ---
 
-## Project Overview
+## 📌 Project Overview
 
-The project demonstrates the process of building a SQL Server data warehouse from raw source data.
+This project implements a SQL Server Data Warehouse using a layered Bronze, Silver, and Gold architecture.
 
-### Main Workflow
+The warehouse integrates data from CRM and ERP CSV sources, loads the source data into the Bronze layer, cleans and standardizes it in the Silver layer, and creates business-ready views in the Gold layer.
 
-1. Load CRM and ERP source data.
-2. Store raw data in the Bronze layer.
-3. Clean and transform data in the Silver layer.
-4. Perform Silver layer quality checks.
-5. Integrate CRM and ERP data.
-6. Create Gold dimension and fact views.
-7. Perform Gold layer quality checks.
-8. Prepare business-ready data for analytics and reporting.
+The final Gold layer follows a Star Schema with customer and product dimensions connected to a sales fact.
 
 ---
 
-## Data Sources
+## 🏗️ Data Architecture
 
-The project uses two source systems.
+The warehouse follows a Medallion Architecture where each layer has a specific responsibility.
 
-### CRM
+```text
+CRM CSV Files ───────┐
+                     │
+                     ▼
+              ┌───────────────┐
+              │ BRONZE LAYER  │
+              │   Raw Data    │
+              └───────┬───────┘
+                      │
+                      ▼
+              ┌───────────────┐
+              │ SILVER LAYER  │
+              │ Cleaned Data  │
+              └───────┬───────┘
+                      │
+                      ▼
+              ┌───────────────┐
+              │  GOLD LAYER   │
+              │ Star Schema   │
+              └───────────────┘
+                      ▲
+                      │
+ERP CSV Files ────────┘
+```
 
-CRM data contains:
+| Layer | Purpose | Main Work |
+|---|---|---|
+|  Bronze | Store source data | CSV ingestion and raw storage |
+|  Silver | Clean and standardize data | Transformation, validation and deduplication |
+|  Gold | Prepare analytical data | Dimensions, fact view and business-ready integration |
+
+---
+
+## 📊 Source Data
+
+The warehouse receives data from two source systems.
+
+### CRM Source
+
+CRM provides:
 
 - Customer information
 - Product information
-- Sales details
+- Sales transaction information
 
 Files:
 
-    cust_info.csv
-    prd_info.csv
-    sales_details.csv
+```text
+cust_info.csv
+prd_info.csv
+sales_details.csv
+```
 
-### ERP
+### ERP Source
 
-ERP data contains:
+ERP provides:
 
 - Customer information
 - Location information
@@ -77,493 +93,777 @@ ERP data contains:
 
 Files:
 
-    CUST_AZ12.csv
-    LOC_A101.csv
-    PX_CAT_G1V2.csv
+```text
+CUST_AZ12.csv
+LOC_A101.csv
+PX_CAT_G1V2.csv
+```
 
 ---
 
-## Data Flow
+# Bronze Layer
 
-    CRM CSV Files ─────┐
-                       │
-                       ▼
-                ┌───────────────┐
-                │ Bronze Layer  │
-                │   Raw Data    │
-                └───────┬───────┘
-                        │
-                        ▼
-                ┌───────────────┐
-                │ Silver Layer  │
-                │ Cleaned Data  │
-                └───────┬───────┘
-                        │
-                        ▼
-                ┌───────────────┐
-                │  Gold Layer   │
-                │ Business Data │
-                └───────┬───────┘
-                        │
-                        ▼
-                Analytics & Reporting
-                        ▲
-                        │
-                ┌───────┴───────┐
-                │  ERP CSV Data │
-                └───────────────┘
+The Bronze layer stores the source data in its original form.
 
----
+### Bronze Tables
 
-## Bronze Layer
+#### CRM
 
-The Bronze layer stores the raw source tables.
+```text
+bronze.crm_cust_info
+bronze.crm_prd_info
+bronze.crm_sales_details
+```
 
-### CRM Tables
+#### ERP
 
-    bronze.crm_cust_info
-    bronze.crm_prd_info
-    bronze.crm_sales_details
-
-### ERP Tables
-
-    bronze.erp_cust_az12
-    bronze.erp_loc_a101
-    bronze.erp_px_cat_g1v2
+```text
+bronze.erp_cust_az12
+bronze.erp_loc_a101
+bronze.erp_px_cat_g1v2
+```
 
 ### Bronze Loading
 
-The Bronze loading process:
+The Bronze loading process is handled by:
+
+```text
+bronze.load_bronze
+```
+
+The procedure:
 
 - Truncates existing Bronze tables.
 - Loads CRM CSV files.
 - Loads ERP CSV files.
-- Uses BULK INSERT.
-- Prints loading messages.
-- Tracks loading duration.
-- Handles errors during loading.
+- Uses `BULK INSERT`.
+- Displays loading progress.
+- Tracks individual table load duration.
+- Tracks total batch duration.
+- Uses `TRY...CATCH` for error handling.
+
+### Bronze Scripts
+
+```text
+scripts/
+└── bronze_layer/
+    ├── DDL_bronze.sql
+    └── product_load_bronze.sql
+```
 
 ---
 
-## Silver Layer
+# Silver Layer
 
-The Silver layer cleans and transforms the Bronze data.
+The Silver layer transforms raw Bronze data into cleaned and standardized data.
 
-### Customer Data
+The Silver loading process is handled by:
 
-- Removes duplicate customer records.
-- Keeps the latest customer record using ROW_NUMBER().
-- Trims customer names.
-- Standardizes marital status.
-- Standardizes gender values.
+```text
+silver.load_silver
+```
 
-### Product Data
+## Customer Transformation
 
-- Separates category and product keys.
-- Standardizes product line values.
-- Handles missing product costs.
-- Converts date values.
-- Creates product validity periods.
+CRM customer data is cleaned by:
 
-### Sales Data
+- Removing duplicate customer records.
+- Keeping the latest customer record.
+- Using `ROW_NUMBER()` for deduplication.
+- Removing unwanted spaces.
+- Standardizing marital status.
+- Standardizing gender values.
 
-- Handles invalid dates.
-- Validates order, shipping, and due dates.
-- Validates sales, quantity, and price relationships.
-- Handles invalid sales values.
-- Handles invalid prices.
+### Marital Status
 
-### ERP Customer Data
+```text
+S → Single
+M → Married
+Other → n/a
+```
 
-- Removes the NAS prefix from customer IDs.
-- Handles future birth dates.
-- Standardizes gender values.
+### Gender
 
-### ERP Location Data
-
-- Removes hyphens from customer IDs.
-- Standardizes country names.
-
-### ERP Product Category Data
-
-- Loads ERP product category information into the Silver layer.
-- Prepares category information for integration with product data.
+```text
+F → Female
+M → Male
+Other → n/a
+```
 
 ---
 
-## Data Quality Checks
+## Product Transformation
 
-Data quality checks are stored separately in the tests directory.
+CRM product data is transformed by:
 
-### Silver Quality Checks
+- Separating category and product keys.
+- Standardizing product line values.
+- Handling missing product costs.
+- Converting date values.
+- Creating product validity periods using `LEAD()`.
 
-File:
+### Product Line
 
-    tests/quality_checks_silver.sql
+```text
+M → Mountain
+R → Road
+S → Other Sales
+T → Touring
+Other → n/a
+```
 
-Checks include:
+---
+
+## Sales Transformation
+
+Sales data is transformed and validated by:
+
+- Converting date values.
+- Handling invalid dates.
+- Validating order, shipping and due dates.
+- Validating sales, quantity and price relationships.
+- Handling invalid sales values.
+- Handling invalid prices.
+
+The main consistency rule is:
+
+```text
+Sales = Quantity × Price
+```
+
+---
+
+## ERP Customer Transformation
+
+ERP customer data is cleaned by:
+
+- Removing the `NAS` prefix from customer IDs.
+- Handling future birth dates.
+- Standardizing gender values.
+
+Example:
+
+```text
+NAS000110001
+      ↓
+000110001
+```
+
+---
+
+## ERP Location Transformation
+
+Location data is standardized by:
+
+- Removing hyphens from customer IDs.
+- Standardizing country names.
+
+Examples:
+
+```text
+DE  → Germany
+US  → United States
+USA → United States
+UK  → United Kingdom
+```
+
+---
+
+## ERP Product Category
+
+ERP product category data is loaded into:
+
+```text
+silver.erp_px_cat_g1v2
+```
+
+This data is later integrated with CRM product information in the Gold layer.
+
+---
+
+## Silver Data Quality
+
+Silver quality checks are maintained separately in:
+
+```text
+tests/quality_checks_silver.sql
+```
+
+The checks validate:
 
 - NULL and duplicate keys.
 - Unwanted spaces.
+- Negative values.
 - Data standardization.
-- Invalid product costs.
-- Invalid date ranges.
-- Invalid sales dates.
-- Sales, quantity, and price consistency.
-- Customer birthdate validation.
-- Country standardization.
-- Product category consistency.
-
-### Gold Quality Checks
-
-File:
-
-    tests/quality_checks_gold.sql
-
-Checks include:
-
-- Customer surrogate key uniqueness.
-- Product surrogate key uniqueness.
-- Fact-to-dimension relationships.
-- Referential integrity between fact and dimension views.
+- Product date ranges.
+- Sales date relationships.
+- Sales, quantity and price consistency.
+- Customer birthdate ranges.
+- Country values.
+- Product category values.
 
 ---
 
-## Gold Layer
+# Gold Layer
 
 The Gold layer contains the final analytical views.
 
-### Customer Dimension
+The Gold layer combines cleaned Silver data and creates a Star Schema.
 
-    gold.dim_customers
+### Gold Objects
 
-Contains:
+```text
+gold.dim_customers
+gold.dim_products
+gold.fact_sales
+```
 
-- Customer key
-- Customer ID
-- Customer number
-- First name
-- Last name
-- Country
-- Marital status
-- Gender
-- Birthdate
-- Create date
+---
 
-A surrogate customer key is generated using ROW_NUMBER().
+## 👤 Customer Dimension
 
-CRM and ERP customer information are integrated into the customer dimension.
+```text
+gold.dim_customers
+```
 
-### Product Dimension
+The customer dimension combines:
 
-    gold.dim_products
+```text
+silver.crm_cust_info
+silver.erp_cust_az12
+silver.erp_loc_a101
+```
 
-Contains:
+### Main Columns
 
-- Product key
-- Product ID
-- Product number
-- Product name
-- Category ID
-- Category
-- Subcategory
-- Maintenance
-- Cost
-- Product line
-- Start date
+```text
+customer_key
+customer_id
+customer_number
+first_name
+last_name
+country
+marital_status
+gender
+birthdate
+create_date
+```
 
-CRM product information is integrated with ERP product category information.
+A surrogate key is generated using:
 
-### Sales Fact
+```sql
+ROW_NUMBER()
+```
 
-    gold.fact_sales
+CRM gender information is used as the primary source, with ERP gender information used as a fallback when required.
 
-Contains:
+---
 
-- Order number
-- Product key
-- Customer key
-- Order date
-- Shipping date
-- Due date
-- Sales amount
-- Quantity
-- Price
+## 🚲 Product Dimension
+
+```text
+gold.dim_products
+```
+
+The product dimension combines:
+
+```text
+silver.crm_prd_info
+silver.erp_px_cat_g1v2
+```
+
+### Main Columns
+
+```text
+product_key
+product_id
+product_number
+product_name
+category_id
+category
+subcategory
+maintenance
+cost
+product_line
+start_date
+```
+
+Only current product records are included:
+
+```sql
+WHERE pn.prd_end_dt IS NULL
+```
+
+---
+
+## 💰 Sales Fact
+
+```text
+gold.fact_sales
+```
 
 The sales fact connects sales transactions with the customer and product dimensions.
 
----
+### Main Columns
 
-## Star Schema
+```text
+order_number
+product_key
+customer_key
+order_date
+shipping_date
+due_date
+sales_amount
+quantity
+price
+```
 
-The Gold layer follows a Star Schema.
-
-    ┌─────────────────────┐
-    │   dim_customers     │
-    │                     │
-    │ customer_key        │
-    │ customer_id         │
-    │ customer_number     │
-    │ customer details    │
-    └──────────┬──────────┘
-               │
-               │
-               ▼
-    ┌─────────────────────┐
-    │     fact_sales      │
-    │                     │
-    │ order_number        │
-    │ customer_key        │
-    │ product_key         │
-    │ order_date          │
-    │ sales_amount        │
-    │ quantity            │
-    │ price               │
-    └──────────┬──────────┘
-               │
-               │
-               ▼
-    ┌─────────────────────┐
-    │    dim_products     │
-    │                     │
-    │ product_key         │
-    │ product_id          │
-    │ product_number      │
-    │ product details     │
-    └─────────────────────┘
+The fact view uses the surrogate keys from the Gold dimensions.
 
 ---
 
-## Repository Structure
+# ⭐ Star Schema
 
-    sql-data-warehouse-project/
-    │
-    ├── datasets/
-    │   ├── source_crm/
-    │   │   ├── cust_info.csv
-    │   │   ├── prd_info.csv
-    │   │   └── sales_details.csv
-    │   │
-    │   └── source_erp/
-    │       ├── CUST_AZ12.csv
-    │       ├── LOC_A101.csv
-    │       └── PX_CAT_G1V2.csv
-    │
-    ├── docs/
-    │   ├── data-architecture.png
-    │   ├── data_catalog.md
-    │   ├── data_flow.png
-    │   ├── data_integration.png
-    │   ├── data_layers.pdf
-    │   ├── data_model.png
-    │   └── naming_conventions.md
-    │
-    ├── scripts/
-    │   ├── bronze_layer/
-    │   │   ├── DDL_bronze.sql
-    │   │   └── product_load_bronze.sql
-    │   │
-    │   ├── silver_layer/
-    │   │   ├── DDL_silver.sql
-    │   │   └── proc_load_silver.sql
-    │   │
-    │   ├── gold_layer/
-    │   │   └── DDL_gold.sql
-    │   │
-    │   └── init_database.sql
-    │
-    ├── tests/
-    │   ├── quality_checks_silver.sql
-    │   └── quality_checks_gold.sql
-    │
-    ├── .gitignore
-    ├── LICENSE
-    ├── README.md
-    └── requirements.txt
+The final Gold layer follows a Star Schema.
 
----
-
-## Technologies Used
-
-- SQL Server
-- T-SQL
-- SQL Server Management Studio (SSMS)
-- Git
-- GitHub
+```text
+                    ┌─────────────────────┐
+                    │   dim_customers     │
+                    │                     │
+                    │ customer_key        │
+                    │ customer_id         │
+                    │ customer_number     │
+                    │ first_name          │
+                    │ last_name           │
+                    │ country             │
+                    │ gender              │
+                    └──────────┬──────────┘
+                               │
+                               │
+                               ▼
+                    ┌─────────────────────┐
+                    │     fact_sales      │
+                    │                     │
+                    │ order_number        │
+                    │ customer_key        │
+                    │ product_key         │
+                    │ order_date          │
+                    │ sales_amount        │
+                    │ quantity            │
+                    │ price               │
+                    └──────────┬──────────┘
+                               │
+                               │
+                               ▼
+                    ┌─────────────────────┐
+                    │    dim_products     │
+                    │                     │
+                    │ product_key         │
+                    │ product_id          │
+                    │ product_number      │
+                    │ product_name        │
+                    │ category            │
+                    │ subcategory         │
+                    │ cost                │
+                    └─────────────────────┘
+```
 
 ---
 
-## SQL Concepts Used
+# 🧪 Gold Data Quality
 
-The project uses practical SQL concepts including:
+Gold quality checks are maintained separately in:
 
-- SELECT
-- INSERT
-- CASE
-- JOIN
-- LEFT JOIN
-- WHERE
-- GROUP BY
-- HAVING
-- TRIM()
-- REPLACE()
-- SUBSTRING()
-- LEN()
-- ISNULL()
-- COALESCE()
-- NULLIF()
-- ROW_NUMBER()
-- LEAD()
-- CAST()
-- GETDATE()
-- Stored Procedures
-- Views
-- BULK INSERT
-- Data Validation
-- Data Quality Testing
+```text
+tests/quality_checks_gold.sql
+```
+
+The checks validate:
+
+### Customer Dimension
+
+- Uniqueness of `customer_key`.
+
+### Product Dimension
+
+- Uniqueness of `product_key`.
+
+### Fact Table
+
+- Fact-to-customer relationship.
+- Fact-to-product relationship.
+- Referential integrity between fact and dimensions.
+
+The objective is to ensure that the Gold model is properly connected for analytical use.
 
 ---
 
-## How to Run
+# 🔄 Data Flow
 
-### 1. Initialize the Database
+The implemented data flow is:
 
-Run:
+```text
+             CRM CSV Files
+                   │
+                   ▼
+          ┌─────────────────┐
+          │  Bronze Layer   │
+          │   Raw Source    │
+          └────────┬────────┘
+                   │
+                   ▼
+          ┌─────────────────┐
+          │  Silver Layer   │
+          │ Cleaned &       │
+          │ Standardized    │
+          └────────┬────────┘
+                   │
+                   ▼
+          ┌─────────────────┐
+          │   Gold Layer    │
+          │ Dimensions +    │
+          │ Fact View       │
+          └────────┬────────┘
+                   │
+                   ▼
+            Analytical Data
 
-    scripts/init_database.sql
 
-### 2. Create Bronze Tables
-
-Run:
-
-    scripts/bronze_layer/DDL_bronze.sql
-
-### 3. Load Bronze Data
-
-Run:
-
-    scripts/bronze_layer/product_load_bronze.sql
-
-This loads the CRM and ERP CSV files into the Bronze layer.
-
-### 4. Create Silver Tables
-
-Run:
-
-    scripts/silver_layer/DDL_silver.sql
-
-### 5. Load Silver Data
-
-Run:
-
-    scripts/silver_layer/proc_load_silver.sql
-
-This cleans and transforms the Bronze data and loads it into the Silver layer.
-
-### 6. Run Silver Quality Checks
-
-Run:
-
-    tests/quality_checks_silver.sql
-
-### 7. Create Gold Views
-
-Run:
-
-    scripts/gold_layer/DDL_gold.sql
-
-This creates:
-
-    gold.dim_customers
-    gold.dim_products
-    gold.fact_sales
-
-### 8. Run Gold Quality Checks
-
-Run:
-
-    tests/quality_checks_gold.sql
+             ERP CSV Files
+                   │
+                   └──────────────► Bronze Layer
+```
 
 ---
 
-## Documentation
+# ▶️ Execution Flow
 
-Additional project documentation is available in the docs directory.
+The project is executed in the following sequence:
 
-The documentation includes:
-
-- Data architecture
-- Data flow
-- Data integration
-- Data model
-- Data layers
-- Data catalog
-- Naming conventions
-
----
-
-## Project Skills Demonstrated
-
-This project demonstrates practical experience with:
-
-- SQL Server Data Warehousing
-- Medallion Architecture
-- ETL Processes
-- Data Ingestion
-- Data Cleaning
-- Data Transformation
-- Data Validation
-- Stored Procedures
-- SQL Views
-- Window Functions
-- Star Schema
-- Fact and Dimension Modeling
-- Surrogate Keys
-- Data Quality Testing
-- CRM and ERP Data Integration
-- Git and GitHub
+```text
+1. Initialize SQL Server database and schemas
+                         │
+                         ▼
+2. Create Bronze tables
+                         │
+                         ▼
+3. Execute bronze.load_bronze
+                         │
+                         ▼
+4. Create Silver tables
+                         │
+                         ▼
+5. Execute silver.load_silver
+                         │
+                         ▼
+6. Run Silver quality checks
+                         │
+                         ▼
+7. Create Gold dimension and fact views
+                         │
+                         ▼
+8. Run Gold quality checks
+```
 
 ---
 
-## Project Status
+# 🛠️ Technology Stack
 
-### Completed
-
-- [x] Database initialization
-- [x] Bronze layer table creation
-- [x] Bronze data loading
-- [x] Bronze stored procedure
-- [x] Silver layer table creation
-- [x] Silver data transformation
-- [x] Silver stored procedure
-- [x] Silver quality checks
-- [x] Gold customer dimension
-- [x] Gold product dimension
-- [x] Gold sales fact
-- [x] Gold quality checks
-- [x] Data architecture documentation
-- [x] Data flow documentation
-- [x] Data model documentation
-- [x] Data catalog
-- [x] Naming conventions
-
-### Future Work
-
-- [ ] Business analytics queries
-- [ ] Analytical reporting
-- [ ] Business insights
+| Area | Technology |
+|---|---|
+| Database | SQL Server |
+| Query Language | T-SQL |
+| Development Environment | SQL Server Management Studio |
+| Data Loading | `BULK INSERT` |
+| Data Processing | Stored Procedures |
+| Architecture | Medallion Architecture |
+| Data Modeling | Star Schema |
+| Version Control | Git / GitHub |
 
 ---
 
-## Author
+# 💻 SQL Concepts Used
 
-**Badavath Madanlal**
+The project uses practical SQL Server and T-SQL concepts.
 
-B.Tech – Computer Science Engineering  
-NIT Silchar
+### DDL
+
+```text
+CREATE DATABASE
+CREATE SCHEMA
+CREATE TABLE
+CREATE VIEW
+CREATE PROCEDURE
+ALTER PROCEDURE
+DROP TABLE
+DROP VIEW
+```
+
+### Data Loading
+
+```text
+BULK INSERT
+INSERT INTO
+TRUNCATE TABLE
+```
+
+### Data Transformation
+
+```text
+CASE
+TRIM()
+REPLACE()
+SUBSTRING()
+LEN()
+CAST()
+ISNULL()
+COALESCE()
+NULLIF()
+GETDATE()
+```
+
+### Querying and Integration
+
+```text
+SELECT
+WHERE
+LEFT JOIN
+GROUP BY
+HAVING
+ORDER BY
+```
+
+### Window Functions
+
+```text
+ROW_NUMBER()
+LEAD()
+```
+
+### Error Handling
+
+```text
+TRY...CATCH
+ERROR_MESSAGE()
+ERROR_NUMBER()
+ERROR_STATE()
+```
+
+### Data Quality
+
+```text
+Duplicate detection
+NULL validation
+Date validation
+Value validation
+Relationship validation
+Standardization checks
+```
 
 ---
 
-## License
+# 📂 Project Structure
 
-This project is available under the license included in this repository.
+```text
+sql-data-warehouse-project/
+│
+├── datasets/
+│   ├── source_crm/
+│   │   ├── cust_info.csv
+│   │   ├── prd_info.csv
+│   │   └── sales_details.csv
+│   │
+│   └── source_erp/
+│       ├── CUST_AZ12.csv
+│       ├── LOC_A101.csv
+│       └── PX_CAT_G1V2.csv
+│
+├── docs/
+│   ├── data-architecture.png
+│   ├── data_catalog.md
+│   ├── data_flow.png
+│   ├── data_integration.png
+│   ├── data_layers.pdf
+│   ├── data_model.png
+│   └── naming_conventions.md
+│
+├── scripts/
+│   │
+│   ├── bronze_layer/
+│   │   ├── DDL_bronze.sql
+│   │   └── product_load_bronze.sql
+│   │
+│   ├── silver_layer/
+│   │   ├── DDL_silver.sql
+│   │   └── proc_load_silver.sql
+│   │
+│   ├── gold_layer/
+│   │   └── DDL_gold.sql
+│   │
+│   └── init_database.sql
+│
+├── tests/
+│   ├── quality_checks_silver.sql
+│   └── quality_checks_gold.sql
+│
+├── .gitignore
+├── LICENSE
+├── README.md
+└── requirements.txt
+```
+
+---
+
+# 📁 SQL Script Organization
+
+The SQL scripts are separated according to the warehouse layer.
+
+### Bronze
+
+```text
+scripts/bronze_layer/DDL_bronze.sql
+scripts/bronze_layer/product_load_bronze.sql
+```
+
+Used for:
+
+- Bronze table creation.
+- Raw CRM and ERP data loading.
+
+### Silver
+
+```text
+scripts/silver_layer/DDL_silver.sql
+scripts/silver_layer/proc_load_silver.sql
+```
+
+Used for:
+
+- Silver table creation.
+- Data cleaning.
+- Data transformation.
+- Data standardization.
+- Silver loading.
+
+### Gold
+
+```text
+scripts/gold_layer/DDL_gold.sql
+```
+
+Used for:
+
+- Customer dimension.
+- Product dimension.
+- Sales fact view.
+
+### Tests
+
+```text
+tests/quality_checks_silver.sql
+tests/quality_checks_gold.sql
+```
+
+Used for validating the Silver and Gold layers.
+
+---
+
+# 📖 Documentation
+
+Supporting project documentation is maintained in the `docs` directory.
+
+```text
+data-architecture.png
+data_catalog.md
+data_flow.png
+data_integration.png
+data_layers.pdf
+data_model.png
+naming_conventions.md
+```
+
+These documents describe the implemented warehouse architecture, data flow, data integration, data model, data layers, data catalog and naming conventions.
+
+---
+
+# 📋 Implementation Summary
+
+| Area | Implemented Work |
+|---|---|
+| Data Sources | CRM and ERP CSV data |
+| Database | SQL Server |
+| Language | T-SQL |
+| Architecture | Bronze, Silver and Gold |
+| Bronze Loading | Stored procedure + `BULK INSERT` |
+| Silver Processing | Cleaning, transformation and standardization |
+| Deduplication | `ROW_NUMBER()` |
+| Date Processing | Validation and conversion |
+| Data Validation | Silver and Gold quality checks |
+| Gold Modeling | Customer and product dimensions + sales fact |
+| Surrogate Keys | `ROW_NUMBER()` |
+| Data Integration | CRM + ERP |
+| Data Model | Star Schema |
+
+---
+
+# ✅ Project Status
+
+The following components have been implemented:
+
+- Database initialization
+- Bronze table creation
+- Bronze data loading
+- Bronze stored procedure
+- Silver table creation
+- Silver data cleaning
+- Silver data transformation
+- Silver standardization
+- Silver loading procedure
+- Silver quality checks
+- Gold customer dimension
+- Gold product dimension
+- Gold sales fact
+- Gold quality checks
+- CRM and ERP integration
+- Star Schema modeling
+- Supporting project documentation
+
+---
+
+# 🎯 Project Focus
+
+The main focus of this project is building a clean, layered SQL Server Data Warehouse that transforms raw CRM and ERP data into reliable, standardized and business-ready data for analytical use.
+
+```text
+Raw Source Data
+       ↓
+Data Ingestion
+       ↓
+Data Cleaning
+       ↓
+Data Transformation
+       ↓
+Data Quality Validation
+       ↓
+Dimensional Modeling
+       ↓
+Business-Ready Data
+```
+---
+
+<div align="start">
+
+### Developed by Badavath Madanlal
+
+</div>
+
+
+---
+
+<div align="center">
+
+### 🗄️ SQL Server Data Warehouse
+
+**Bronze → Silver → Gold → Analytics Ready**
+
+</div>
